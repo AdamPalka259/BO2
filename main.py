@@ -59,8 +59,12 @@ def starting_solution(prior_list: List[List[int]], dorm_capacity: List[int]):
     return result
 
 
-def tabu_search():
-    pass
+def tabu_search(years: List[int], disabilities: List[Union[0, 1, 2, 3]], prior_list: List[List[int]], dep_pos: List[Tuple[float, float]], dorm_capacity: List[int], dorm_pos: List[Tuple[float, float]]):
+    # Losowe rozwiązanie startowe
+    s = starting_solution(prior_list, dorm_capacity)
+
+    # Inicjowanie listy tabu
+    t = []
 
 
 if __name__ == '__main__':
