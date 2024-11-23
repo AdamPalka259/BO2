@@ -56,7 +56,6 @@ data = generate_data(N, num_dormitories, num_departments)
 (students_years, students_disability, students_priority_lists,
  students_departments, dormitorys_capacity, dormitory_position,
  departments_position) = data
-#testest4
 
 
 
