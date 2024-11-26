@@ -29,18 +29,11 @@ def generate_data(N: int, num_dormitories: int, num_departments: int) -> Tuple[
 
         else:
             break
-        
-    # print('dormitorys_capacities')
-    # print(dormitorys_capacity)
-    # print('dormitorys_positions')
-    # print(dormitory_position)
 
     # Departments data
     departments_position = []
     for y in range(num_departments):
         departments_position.append((round(random.uniform(1, 50), 2), round(random.uniform(1, 50), 2)))
-    # print('departments_positions')
-    # print(departments_position)
 
     # Student_data
     # print("stud_data id rok niepel priorytet_akademikow   wydzial kordy_wydzialu")

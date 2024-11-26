@@ -4,17 +4,17 @@ from rand import generate_data
 
 # students data
 '''Id studenta to jego indeks w listach'''
-'''students_years: List[int] = []  # Rok, na którym studiują studenci
-students_disability: List[Union[0, 1, 2, 3]] = []  # Stopień niepełnosprawności studentów
-students_priority_lists: List[List[int]] = [[]]  # Lista priorytetów studentów
-students_departments: List[int] = [] # Lista wydziałów studentów'''
+'''students_years: List[int] = []                       # Rok, na którym studiują studenci
+students_disability: List[Union[0, 1, 2, 3]] = []       # Stopień niepełnosprawności studentów
+students_priority_lists: List[List[int]] = [[]]         # Lista priorytetów studentów
+students_departments: List[int] = []                    # Lista wydziałów studentów'''
 
 # dormitories data
 '''Id akademika to jego indeks w listach'''
-'''dormitorys_capacity: List[int] = []  # Pojemność akademików
-dormitory_position: List[Tuple[float, float]] = []  # Pozycja akademików (x, y) w km
+'''dormitorys_capacity: List[int] = []                  # Pojemność akademików
+dormitory_position: List[Tuple[float, float]] = []      # Pozycja akademików (x, y) w km
 
-departments_position: List[Tuple[float, float]] = []  # Pozycja wydziałów studentów (x, y) w km'''
+departments_position: List[Tuple[float, float]] = []    # Pozycja wydziałów studentów (x, y) w km'''
 disability_priority: Dict[int, int] = {1: 100, 2: 75, 3: 50, 0: 25}  # Priorytet na podstawie stopnia niepełnosprawności używany w funkcji celu
 
 
@@ -89,8 +89,8 @@ def tabu_search(
     dorm_capacity: List[int],
     dorm_pos: List[Tuple[float, float]],
     dep_pos: List[Tuple[float, float]],
-    max_iterations: int = 100,
-    tabu_list_size: int = 10,
+    max_iterations: int = 200,
+    tabu_list_size: int = 100,
     alpha: float = 0.5
 ):
     '''Implementacja algorytmu Tabu Search dla przypisania akademików.'''
@@ -151,7 +151,7 @@ def tabu_search(
         if len(tabu_list) > tabu_list_size:
             tabu_list.pop(0)
 
-    return best_solution, best_objective, checked_solutions
+    return best_solution, best_objective #, checked_solutions
 
 
 if __name__ == '__main__':
