@@ -3,19 +3,6 @@ from math import sqrt
 from rand import generate_data
 import os
 
-# students data
-'''Id studenta to jego indeks w listach'''
-'''students_years: List[int] = []                       # Rok, na którym studiują studenci
-students_disability: List[Union[0, 1, 2, 3]] = []       # Stopień niepełnosprawności studentów
-students_priority_lists: List[List[int]] = [[]]         # Lista priorytetów studentów
-students_departments: List[int] = []                    # Lista wydziałów studentów'''
-
-# dormitories data
-'''Id akademika to jego indeks w listach'''
-'''dormitorys_capacity: List[int] = []                  # Pojemność akademików
-dormitory_position: List[Tuple[float, float]] = []      # Pozycja akademików (x, y) w km
-
-departments_position: List[Tuple[float, float]] = []    # Pozycja wydziałów studentów (x, y) w km'''
 disability_priority: Dict[int, int] = {1: 100, 2: 75, 3: 50, 0: 25}  # Priorytet na podstawie stopnia niepełnosprawności używany w funkcji celu
 
 clear = lambda: os.system('cls')
@@ -34,19 +21,25 @@ def calculate_distances(dorm_pos: List[tuple[float]], dep_pos: List[tuple[float]
     return dist_matrix
 
 
-def starting_solution(prior_list: List[List[int]], dorm_capacity: List[int], min_fill: float = 0) -> List[int]:
-    '''Zwraca początkowe rozwiązanie do algorytmu Tabu Search z uwzględnieniem warunku min_fill.'''
+def starting_solution(
+    prior_list: List[List[int]], 
+    dorm_capacity: List[int], 
+    min_fill: float = 0,  # Minimalny poziom wypełnienia (tylko dla choice == 2)
+    choice: int = 1       # Tryb rozwiązania (1 - bez min_fill, 2 - z min_fill)
+) -> List[int]:
+    '''Zwraca początkowe rozwiązanie do algorytmu Tabu Search z uwzględnieniem wyboru trybu działania (choice).'''
     result = [None] * len(prior_list)  # Wstępne przypisanie "brak akademika" każdemu studentowi
     dorm_counter = {i: 0 for i in range(len(dorm_capacity))}  # Licznik miejsc w akademikach
     bad_students = []  # Studenci, których nie udało się przypisać w pierwszej pętli
 
-    # Obliczenie maksymalnego możliwego min_fill
-    total_capacity = sum(dorm_capacity)
-    max_possible_fill = min(1, len(prior_list) / total_capacity)
+    # Jeśli choice == 2, obliczamy maksymalny możliwy min_fill
+    if choice == 2:
+        total_capacity = sum(dorm_capacity)
+        max_possible_fill = min(1, len(prior_list) / total_capacity)
 
-    # Jeśli podany min_fill jest wyższy niż maksymalny możliwy, zastąp go
-    if min_fill > max_possible_fill:
-        min_fill = max_possible_fill
+        # Jeśli podany min_fill jest wyższy niż maksymalny możliwy, zastąp go
+        if min_fill > max_possible_fill:
+            min_fill = max_possible_fill
 
     # Pierwsza pętla: Przypisanie zgodnie z listą priorytetów
     for i, student_prior in enumerate(prior_list):
@@ -66,13 +59,17 @@ def starting_solution(prior_list: List[List[int]], dorm_capacity: List[int], min
         for dorm in range(len(dorm_capacity)):
             # Sprawdzenie warunku minimalnego wypełnienia
             current_fill = dorm_counter[dorm] / dorm_capacity[dorm] if dorm_capacity[dorm] > 0 else 0
-            if dorm_counter[dorm] < dorm_capacity[dorm] and current_fill >= min_fill:
-                dorm_counter[dorm] += 1
-                result[student] = dorm  # Przypisanie studenta
-                break  
+            if dorm_counter[dorm] < dorm_capacity[dorm]:
+                if choice == 2 and current_fill >= min_fill:
+                    dorm_counter[dorm] += 1
+                    result[student] = dorm  # Przypisanie studenta
+                    break
+                elif choice == 1:
+                    dorm_counter[dorm] += 1
+                    result[student] = dorm  # Przypisanie studenta
+                    break
 
     return result
-
 
 
 def objective_func(
@@ -103,8 +100,8 @@ def tabu_search(
     dorm_capacity: List[int],
     dorm_pos: List[Tuple[float, float]],
     dep_pos: List[Tuple[float, float]],
-    choice: Union[1, 2, 3],
-    min_fill: float = 0,  # Minimalny poziom wypełnienia (dla choice == 2)
+    choice: Union[1, 2],
+    min_fill: float = 0,  # Minimalny poziom wypełnienia (tylko dla choice == 2)
     max_iterations: int = 200,
     tabu_list_size: int = 100,
     alpha: float = 0.5
@@ -113,18 +110,8 @@ def tabu_search(
 
     distances = calculate_distances(dorm_pos, dep_pos)
 
-    # Obliczenie maksymalnego możliwego min_fill
-    total_capacity = sum(dorm_capacity)
-    max_possible_fill = min(1, len(prior_list) / total_capacity)
-
-    # Jeśli podany min_fill jest wyższy niż maksymalny możliwy, zastąp go
-    if min_fill > max_possible_fill:
-        print(f"Uwaga: min_fill {min_fill:.2f} jest niemożliwe do osiągnięcia. "
-              f"Zmieniono na maksymalne możliwe min_fill = {max_possible_fill:.2f}.")
-        min_fill = max_possible_fill
-
     # Rozwiązanie początkowe
-    current_solution = starting_solution(prior_list, dorm_capacity, min_fill)
+    current_solution = starting_solution(prior_list, dorm_capacity, min_fill, choice)
     best_solution = current_solution[:]
     best_objective = objective_func(current_solution, years, disabilities, prior_list, departments, distances, alpha)
 
@@ -133,6 +120,17 @@ def tabu_search(
 
     # Licznik odwiedzonych rozwiązań
     visited_solutions = 0
+
+    # Jeśli choice == 2, obliczamy maksymalny możliwy min_fill
+    if choice == 2:
+        total_capacity = sum(dorm_capacity)
+        max_possible_fill = min(1, len(prior_list) / total_capacity)
+
+        # Jeśli podany min_fill jest wyższy niż maksymalny możliwy, zastąp go
+        if min_fill > max_possible_fill:
+            print(f"Uwaga: min_fill {min_fill:.2f} jest niemożliwe do osiągnięcia. "
+                  f"Zmieniono na maksymalne możliwe min_fill = {max_possible_fill:.2f}.")
+            min_fill = max_possible_fill
 
     for _ in range(max_iterations):
         neighbors = []
@@ -147,13 +145,16 @@ def tabu_search(
                     # Warunek ograniczonej pojemności akademików
                     dorm_counts = {d: new_solution.count(d) for d in range(len(dorm_capacity))}
                     if dorm_counts[dorm] <= dorm_capacity[dorm]:
+
+                        # Sprawdzenie dla choice == 2: Minimalny poziom wypełnienia akademików
                         if choice == 2:
-                            # Minimalny poziom wypełnienia akademików
                             min_fill_counts = [dorm_counts[d] / dorm_capacity[d] for d in range(len(dorm_capacity))]
-                            if min(min_fill_counts) >= min_fill:  # Akademiki muszą spełniać minimalny poziom wypełnienia
+                            if min(min_fill_counts) >= min_fill:
                                 neighbors.append(new_solution)
                                 visited_solutions += 1  # Zlicz rozwiązanie
-                        else:
+
+                        # Sprawdzenie dla choice == 1: Standardowe przypisanie
+                        elif choice == 1:
                             neighbors.append(new_solution)
                             visited_solutions += 1  # Zlicz rozwiązanie
 
@@ -189,6 +190,7 @@ def tabu_search(
 
 
 
+
 def main_loop():
     while True:
         os.system('cls')
@@ -206,6 +208,7 @@ def main_loop():
         students_disability,
         students_priority_lists,
         students_departments,
+        student_sex,
         dormitorys_capacity,
         dormitory_position,
         departments_position] = generate_data(N, num_dorm, num_dep)
@@ -222,7 +225,7 @@ def main_loop():
         elif restriction_choice == 1:
             print('')
             print(tabu_search(students_years, students_disability, 
-                            students_priority_lists, students_departments, 
+                            students_priority_lists, students_departments,
                             dormitorys_capacity, dormitory_position, departments_position, 
                             restriction_choice))
             input()

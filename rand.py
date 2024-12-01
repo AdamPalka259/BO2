@@ -37,20 +37,19 @@ def generate_data(N: int, num_dormitories: int, num_departments: int) -> Tuple[
         departments_position.append((round(random.uniform(1, 50), 2), round(random.uniform(1, 50), 2)))
 
     # Student_data
-    print("stud_data id rok niepel priorytet_akademikow   wydzial kordy_wydzialu plec")
-    for i in range(N):
-         x = students_departments[i]
-         print("student_id",i,"->",students_years[i],students_disability[i],students_priority_lists[i],students_departments[i],departments_position[x-1],student_sex[i])
+    # print("stud_data id rok niepel priorytet_akademikow   wydzial kordy_wydzialu plec")
+    # for i in range(N):
+    #      x = students_departments[i]
+    #      print("student_id",i,"->",students_years[i],students_disability[i],students_priority_lists[i],students_departments[i],departments_position[x-1],student_sex[i])
 
     return (
         students_years,
         students_disability,
         students_priority_lists,
         students_departments,
+        student_sex,
         dormitorys_capacity,
         dormitory_position,
-        departments_position,
-        student_sex
+        departments_position
     )
 
-generate_data(100,10,10)
