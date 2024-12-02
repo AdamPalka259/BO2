@@ -100,7 +100,7 @@ def tabu_search(
     dorm_capacity: List[int],
     dorm_pos: List[Tuple[float, float]],
     dep_pos: List[Tuple[float, float]],
-    choice: Union[1, 2],
+    choice: Union[1, 2, 3], 
     min_fill: float = 0,  # Minimalny poziom wypełnienia (tylko dla choice == 2)
     max_iterations: int = 200,
     tabu_list_size: int = 100,
@@ -138,6 +138,10 @@ def tabu_search(
         # Generowanie sąsiedztwa
         for student in range(len(current_solution)):
             for dorm in prior_list[student]:
+                # Dla choice == 3 pomijamy ostatni akademik z listy priorytetów
+                if choice == 3 and dorm == prior_list[student][-1]:
+                    continue
+
                 if dorm != current_solution[student]:
                     new_solution = current_solution[:]
                     new_solution[student] = dorm
@@ -153,8 +157,8 @@ def tabu_search(
                                 neighbors.append(new_solution)
                                 visited_solutions += 1  # Zlicz rozwiązanie
 
-                        # Sprawdzenie dla choice == 1: Standardowe przypisanie
-                        elif choice == 1:
+                        # Sprawdzenie dla choice == 1 i choice == 3: Standardowe przypisanie
+                        elif choice in [1, 3]:
                             neighbors.append(new_solution)
                             visited_solutions += 1  # Zlicz rozwiązanie
 
@@ -189,8 +193,6 @@ def tabu_search(
     return best_solution, best_objective #, visited_solutions
 
 
-
-
 def main_loop():
     while True:
         os.system('cls')
@@ -216,7 +218,7 @@ def main_loop():
         print('---OGRANICZENIA---')
         print('1. Brak')
         print('2. Minimalny poziom wypełnienia akademików')
-        print('---------------')
+        print('3. Usunięcie najbardziej niechcianego akademika')
         restriction_choice = int(input('Wybierz (1, 2, 3, 4): '))
 
         if restriction_choice not in [1, 2, 3, 4]:
@@ -238,6 +240,14 @@ def main_loop():
                             students_priority_lists, students_departments, 
                             dormitorys_capacity, dormitory_position, departments_position, 
                             restriction_choice, min_fill))
+            input()
+
+        elif restriction_choice == 3:
+            print('')
+            print(tabu_search(students_years, students_disability, 
+                            students_priority_lists, students_departments, 
+                            dormitorys_capacity, dormitory_position, departments_position, 
+                            restriction_choice))
             input()
 
 
