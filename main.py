@@ -24,13 +24,20 @@ def calculate_distances(dorm_pos: List[tuple[float]], dep_pos: List[tuple[float]
 def starting_solution(
     prior_list: List[List[int]], 
     dorm_capacity: List[int], 
+    students_sex: List[int],  # 0 - mężczyzna, 1 - kobieta
     min_fill: float = 0,  # Minimalny poziom wypełnienia (tylko dla choice == 2)
-    choice: int = 1       # Tryb rozwiązania (1 - bez min_fill, 2 - z min_fill)
+    choice: int = 1       # Tryb rozwiązania (1 - bez min_fill, 2 - z min_fill, 4 - proporcja płci)
 ) -> List[int]:
     '''Zwraca początkowe rozwiązanie do algorytmu Tabu Search z uwzględnieniem wyboru trybu działania (choice).'''
     result = [None] * len(prior_list)  # Wstępne przypisanie "brak akademika" każdemu studentowi
-    dorm_counter = {i: 0 for i in range(len(dorm_capacity))}  # Licznik miejsc w akademikach
+    dorm_counter = {i: {'male': 0, 'female': 0} for i in range(len(dorm_capacity))}  # Licznik płci w akademikach
     bad_students = []  # Studenci, których nie udało się przypisać w pierwszej pętli
+
+    # Jeśli choice == 4, obliczamy globalną proporcję płci
+    if choice == 4:
+        total_males = sum(1 for s in students_sex if s == 0)
+        total_females = sum(1 for s in students_sex if s == 1)
+        global_gender_ratio = total_females / total_males if total_males > 0 else 1
 
     # Jeśli choice == 2, obliczamy maksymalny możliwy min_fill
     if choice == 2:
@@ -45,31 +52,62 @@ def starting_solution(
     for i, student_prior in enumerate(prior_list):
         assigned = False  # Flaga określająca, czy student został przypisany
         for dorm in student_prior:
-            if dorm is not None and dorm_counter[dorm] < dorm_capacity[dorm]:
-                dorm_counter[dorm] += 1
-                result[i] = dorm  # Przypisanie akademika
-                assigned = True
-                break  
+            if dorm is not None:
+                current_total = dorm_counter[dorm]['male'] + dorm_counter[dorm]['female']
+                if current_total < dorm_capacity[dorm]:
+                    # Przydział dla choice == 4 z zachowaniem proporcji płci
+                    if choice == 4:
+                        # Obliczamy lokalną proporcję płci w akademiku
+                        local_males = dorm_counter[dorm]['male']
+                        local_females = dorm_counter[dorm]['female']
+                        local_ratio = (local_females / local_males) if local_males > 0 else float('inf')
+
+                        # Sprawdzenie, czy przydział zachowuje proporcję
+                        if students_sex[i] == 1 and local_ratio < global_gender_ratio:  # Kobieta
+                            dorm_counter[dorm]['female'] += 1
+                            result[i] = dorm
+                            assigned = True
+                            break
+                        elif students_sex[i] == 0 and local_ratio > global_gender_ratio:  # Mężczyzna
+                            dorm_counter[dorm]['male'] += 1
+                            result[i] = dorm
+                            assigned = True
+                            break
+                    else:  # Przydział dla innych trybów
+                        dorm_counter[dorm]['female' if students_sex[i] == 1 else 'male'] += 1
+                        result[i] = dorm
+                        assigned = True
+                        break
 
         if not assigned:
             bad_students.append(i)  # Student bez przypisania w pierwszej pętli
 
-    # Druga pętla: Przypisanie pozostałych studentów z uwzględnieniem min_fill
+    # Druga pętla: Przypisanie pozostałych studentów
     for student in bad_students:
         for dorm in range(len(dorm_capacity)):
-            # Sprawdzenie warunku minimalnego wypełnienia
-            current_fill = dorm_counter[dorm] / dorm_capacity[dorm] if dorm_capacity[dorm] > 0 else 0
-            if dorm_counter[dorm] < dorm_capacity[dorm]:
-                if choice == 2 and current_fill >= min_fill:
-                    dorm_counter[dorm] += 1
-                    result[student] = dorm  # Przypisanie studenta
-                    break
-                elif choice == 1:
-                    dorm_counter[dorm] += 1
-                    result[student] = dorm  # Przypisanie studenta
+            current_total = dorm_counter[dorm]['male'] + dorm_counter[dorm]['female']
+            if current_total < dorm_capacity[dorm]:
+                # Sprawdzenie proporcji płci dla choice == 4
+                if choice == 4:
+                    local_males = dorm_counter[dorm]['male']
+                    local_females = dorm_counter[dorm]['female']
+                    local_ratio = (local_females / local_males) if local_males > 0 else float('inf')
+
+                    if students_sex[student] == 1 and local_ratio < global_gender_ratio:  # Kobieta
+                        dorm_counter[dorm]['female'] += 1
+                        result[student] = dorm
+                        break
+                    elif students_sex[student] == 0 and local_ratio > global_gender_ratio:  # Mężczyzna
+                        dorm_counter[dorm]['male'] += 1
+                        result[student] = dorm
+                        break
+                else:  # Standardowe przydziały
+                    dorm_counter[dorm]['female' if students_sex[student] == 1 else 'male'] += 1
+                    result[student] = dorm
                     break
 
     return result
+
 
 
 def objective_func(
@@ -100,7 +138,8 @@ def tabu_search(
     dorm_capacity: List[int],
     dorm_pos: List[Tuple[float, float]],
     dep_pos: List[Tuple[float, float]],
-    choice: Union[1, 2, 3], 
+    students_sex: List[int],  # 0 - mężczyzna, 1 - kobieta
+    choice: Union[1, 2, 3, 4],
     min_fill: float = 0,  # Minimalny poziom wypełnienia (tylko dla choice == 2)
     max_iterations: int = 200,
     tabu_list_size: int = 100,
@@ -111,7 +150,7 @@ def tabu_search(
     distances = calculate_distances(dorm_pos, dep_pos)
 
     # Rozwiązanie początkowe
-    current_solution = starting_solution(prior_list, dorm_capacity, min_fill, choice)
+    current_solution = starting_solution(prior_list, dorm_capacity, students_sex, min_fill, choice)
     best_solution = current_solution[:]
     best_objective = objective_func(current_solution, years, disabilities, prior_list, departments, distances, alpha)
 
@@ -132,6 +171,12 @@ def tabu_search(
                   f"Zmieniono na maksymalne możliwe min_fill = {max_possible_fill:.2f}.")
             min_fill = max_possible_fill
 
+    # Oblicz globalną proporcję płci dla choice == 4
+    if choice == 4:
+        total_males = sum(1 for sex in students_sex if sex == 0)
+        total_females = sum(1 for sex in students_sex if sex == 1)
+        global_gender_ratio = total_females / total_males if total_males > 0 else float('inf')
+
     for _ in range(max_iterations):
         neighbors = []
 
@@ -147,18 +192,37 @@ def tabu_search(
                     new_solution[student] = dorm
 
                     # Warunek ograniczonej pojemności akademików
-                    dorm_counts = {d: new_solution.count(d) for d in range(len(dorm_capacity))}
-                    if dorm_counts[dorm] <= dorm_capacity[dorm]:
+                    dorm_counts = {d: {'male': 0, 'female': 0} for d in range(len(dorm_capacity))}
+                    for s, assigned_dorm in enumerate(new_solution):
+                        if assigned_dorm is not None:
+                            dorm_counts[assigned_dorm]['male' if students_sex[s] == 0 else 'female'] += 1
 
+                    # Proporcja płci dla choice == 4
+                    if choice == 4:
+                        valid = True
+                        for d in range(len(dorm_capacity)):
+                            local_males = dorm_counts[d]['male']
+                            local_females = dorm_counts[d]['female']
+                            local_ratio = (local_females / local_males) if local_males > 0 else float('inf')
+
+                            # Sprawdzamy, czy proporcja w akademiku nie odbiega zbytnio od globalnej
+                            if abs(local_ratio - global_gender_ratio) > 0.1 * global_gender_ratio:  # Tolerancja 10%
+                                valid = False
+                                break
+                        if not valid:
+                            continue
+
+                    if dorm_counts[dorm]['male'] + dorm_counts[dorm]['female'] <= dorm_capacity[dorm]:
                         # Sprawdzenie dla choice == 2: Minimalny poziom wypełnienia akademików
                         if choice == 2:
-                            min_fill_counts = [dorm_counts[d] / dorm_capacity[d] for d in range(len(dorm_capacity))]
+                            min_fill_counts = [(dorm_counts[d]['male'] + dorm_counts[d]['female']) / dorm_capacity[d]
+                                               for d in range(len(dorm_capacity))]
                             if min(min_fill_counts) >= min_fill:
                                 neighbors.append(new_solution)
                                 visited_solutions += 1  # Zlicz rozwiązanie
 
-                        # Sprawdzenie dla choice == 1 i choice == 3: Standardowe przypisanie
-                        elif choice in [1, 3]:
+                        # Sprawdzenie dla pozostałych trybów
+                        elif choice in [1, 3, 4]:
                             neighbors.append(new_solution)
                             visited_solutions += 1  # Zlicz rozwiązanie
 
@@ -210,7 +274,7 @@ def main_loop():
         students_disability,
         students_priority_lists,
         students_departments,
-        student_sex,
+        students_sex,
         dormitorys_capacity,
         dormitory_position,
         departments_position] = generate_data(N, num_dorm, num_dep)
@@ -219,6 +283,7 @@ def main_loop():
         print('1. Brak')
         print('2. Minimalny poziom wypełnienia akademików')
         print('3. Usunięcie najbardziej niechcianego akademika')
+        print('4. Równe rozmieszczenie ze względu na płeć')
         restriction_choice = int(input('Wybierz (1, 2, 3, 4): '))
 
         if restriction_choice not in [1, 2, 3, 4]:
@@ -227,9 +292,9 @@ def main_loop():
         elif restriction_choice == 1:
             print('')
             print(tabu_search(students_years, students_disability, 
-                            students_priority_lists, students_departments,
+                            students_priority_lists, students_departments, 
                             dormitorys_capacity, dormitory_position, departments_position, 
-                            restriction_choice))
+                            students_sex, restriction_choice))
             input()
 
         elif restriction_choice == 2:
@@ -239,7 +304,7 @@ def main_loop():
             print(tabu_search(students_years, students_disability, 
                             students_priority_lists, students_departments, 
                             dormitorys_capacity, dormitory_position, departments_position, 
-                            restriction_choice, min_fill))
+                            students_sex, restriction_choice, min_fill))
             input()
 
         elif restriction_choice == 3:
@@ -247,7 +312,15 @@ def main_loop():
             print(tabu_search(students_years, students_disability, 
                             students_priority_lists, students_departments, 
                             dormitorys_capacity, dormitory_position, departments_position, 
-                            restriction_choice))
+                            students_sex, restriction_choice))
+            input()
+
+        elif restriction_choice == 4:
+            print('')
+            print(tabu_search(students_years, students_disability, 
+                            students_priority_lists, students_departments, 
+                            dormitorys_capacity, dormitory_position, departments_position, 
+                            students_sex, restriction_choice))
             input()
 
 
