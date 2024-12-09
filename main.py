@@ -24,9 +24,9 @@ def calculate_distances(dorm_pos: List[tuple[float]], dep_pos: List[tuple[float]
 def starting_solution(
     prior_list: List[List[int]], 
     dorm_capacity: List[int], 
-    students_sex: List[int],  # 0 - mężczyzna, 1 - kobieta
-    min_fill: float = 0,  # Minimalny poziom wypełnienia (tylko dla choice == 2)
-    choice: int = 1       # Tryb rozwiązania (1 - bez min_fill, 2 - z min_fill, 4 - proporcja płci)
+    students_sex: List[int],    # 0 - mężczyzna, 1 - kobieta
+    min_fill: float = 0,        # Minimalny poziom wypełnienia (tylko dla choice == 2)
+    choice: int = 1             # Tryb rozwiązania (1 - bez ograniczeń, 2 - minimalny poziom wypełnienia, 3 - usunięcie niechcianego, 4 - proporcja płci)
 ) -> List[int]:
     '''Zwraca początkowe rozwiązanie do algorytmu Tabu Search z uwzględnieniem wyboru trybu działania (choice).'''
     result = [None] * len(prior_list)  # Wstępne przypisanie "brak akademika" każdemu studentowi

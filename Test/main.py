@@ -56,10 +56,11 @@ def main_loop():
         print('---SPOSOBY DEFINIOWANIA SĄSIEDZTWA---')
         print('1. Zmiana akademika')
         print('2. Zamiana studentów')
-        print('3. Zmiana akademika i zamiana studentów')
-        neighbourhood_choice = int(input('Wybierz (1, 2, 3): '))
+        print('3. Przeniesienie grupy studentów')
+        print('4. Wszystkie jednocześnie')
+        neighbourhood_choice = int(input('Wybierz (1, 2, 3, 4): '))
 
-        if neighbourhood_choice not in [1, 2, 3]:
+        if neighbourhood_choice not in [1, 2, 3, 4]:
             print('Wrong input!')
         
         elif neighbourhood_choice == 1:
@@ -87,6 +88,18 @@ def main_loop():
             input()
 
         elif neighbourhood_choice == 3:
+            print('')
+            best_solution, best_objective = tabu_search(start_solution, students_years, students_disability, 
+                            students_priority_lists, students_sex, students_departments, 
+                            dormitorys_capacity, dormitory_position, departments_position, 
+                            'move_group')
+            
+            print("Najlepsze rozwiązanie:", best_solution)
+            print("Wartość funkcji celu:", best_objective)
+
+            input()
+        
+        elif neighbourhood_choice == 4:
             print('')
             best_solution, best_objective = tabu_search(start_solution, students_years, students_disability, 
                             students_priority_lists, students_sex, students_departments, 

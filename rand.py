@@ -10,7 +10,7 @@ def generate_data(N: int, num_dormitories: int, num_departments: int) -> Tuple[
     students_disability = random.choices([0, 1, 2, 3], weights=[70, 15, 10, 5], k=N) # Stopień niepełnosprawności
     students_priority_lists = [random.sample(range(num_dormitories), num_dormitories) for _ in range(N)]  # Priorytety akademików
     students_departments = [random.randint(0, num_departments - 1) for _ in range(N)]  # Losowy wydział dla każdego studenta
-    student_sex = random.choices([0, 1], weights=[35, 65], k=N)
+    student_sex = random.choices([0, 1], weights=[65, 35], k=N)
 
     # Dormitories data
     dormitory_position = []

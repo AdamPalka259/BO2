@@ -74,6 +74,14 @@ def generate_neighbourhood(
     neighbourhood = []
     num_students = len(current_solution)
 
+    def is_valid_solution(solution):
+        '''Sprawdza, czy rozwiązanie spełnia ograniczenia pojemności akademików.'''
+        capacity_usage = [0] * len(dorm_capacity)
+        for dorm in solution:
+            if dorm is not None:
+                capacity_usage[dorm] += 1
+        return all(capacity_usage[dorm] <= dorm_capacity[dorm] for dorm in range(len(dorm_capacity)))
+
     if neighbourhood_type in ("change_dorm", "both"):
         for i in range(num_students):
             if current_solution[i] is not None:
@@ -81,7 +89,8 @@ def generate_neighbourhood(
                     if dorm != current_solution[i]:
                         new_solution = current_solution[:]
                         new_solution[i] = dorm
-                        neighbourhood.append(new_solution)
+                        if is_valid_solution(new_solution):
+                            neighbourhood.append(new_solution)
 
     if neighbourhood_type in ("swap_students", "both"):
         for i in range(num_students):
@@ -89,7 +98,21 @@ def generate_neighbourhood(
                 if current_solution[i] is not None and current_solution[j] is not None:
                     new_solution = current_solution[:]
                     new_solution[i], new_solution[j] = new_solution[j], new_solution[i]
-                    neighbourhood.append(new_solution)
+                    if is_valid_solution(new_solution):
+                        neighbourhood.append(new_solution)
+
+    if neighbourhood_type in ("move_group", "both"):
+        for dorm_from in range(len(dorm_capacity)):
+            for dorm_to in range(len(dorm_capacity)):
+                if dorm_from != dorm_to:
+                    # Zidentyfikuj studentów przypisanych do dorm_from
+                    group = [i for i in range(num_students) if current_solution[i] == dorm_from]
+                    if group:
+                        new_solution = current_solution[:]
+                        for student in group:
+                            new_solution[student] = dorm_to
+                        if is_valid_solution(new_solution):
+                            neighbourhood.append(new_solution)
 
     return neighbourhood
 
@@ -154,7 +177,7 @@ def tabu_search(
         # Filtrowanie przez listę tabu
         neighbourhood = [solution for solution in neighbourhood if solution not in tabu_list]
         if not neighbourhood:
-            print("Brak sąsiedztwa po uwzględnieniu tabu, kończymy iterację.")
+            print("Brak sąsiedztwa po uwzględnieniu listy tabu, kończymy iterację.")
             break
 
         # Inicjalizacja najlepszych wartości w bieżącej iteracji
