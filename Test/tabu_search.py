@@ -172,10 +172,7 @@ def tabu_search(
 
         # Zbieranie danych do wykresu
         iterations.append(iteration)
-        print(iterations)
-        objectives.append(best_objective)
-        print(objectives)
-        
+        objectives.append(best_objective)        
         # Generowanie sąsiedztwa z uwzględnieniem typu sąsiedztwa
         neighbourhood = generate_neighbourhood(
             current_solution, prior_list, dorm_capacity, neighbourhood_type
