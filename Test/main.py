@@ -1,6 +1,7 @@
 from rand import generate_data
 from tabu_search import tabu_search, starting_solution
 import os
+import matplotlib.pyplot as plt
 
 clear = lambda: os.system('cls')
 
@@ -65,7 +66,7 @@ def main_loop():
         
         elif neighbourhood_choice == 1:
             print('')
-            best_solution, best_objective = tabu_search(start_solution, students_years, students_disability, 
+            best_solution, best_objective, iterations, objectives = tabu_search(start_solution, students_years, students_disability, 
                             students_priority_lists, students_sex, students_departments, 
                             dormitorys_capacity, dormitory_position, departments_position, 
                             'change_dorm')
@@ -77,7 +78,7 @@ def main_loop():
 
         elif neighbourhood_choice == 2:
             print('')
-            best_solution, best_objective = tabu_search(start_solution, students_years, students_disability, 
+            best_solution, best_objective, iterations, objectives = tabu_search(start_solution, students_years, students_disability, 
                             students_priority_lists, students_sex, students_departments, 
                             dormitorys_capacity, dormitory_position, departments_position, 
                             'swap_students')
@@ -89,7 +90,7 @@ def main_loop():
 
         elif neighbourhood_choice == 3:
             print('')
-            best_solution, best_objective = tabu_search(start_solution, students_years, students_disability, 
+            best_solution, best_objective, iterations, objectives = tabu_search(start_solution, students_years, students_disability, 
                             students_priority_lists, students_sex, students_departments, 
                             dormitorys_capacity, dormitory_position, departments_position, 
                             'move_group')
@@ -101,7 +102,7 @@ def main_loop():
         
         elif neighbourhood_choice == 4:
             print('')
-            best_solution, best_objective = tabu_search(start_solution, students_years, students_disability, 
+            best_solution, best_objective, iterations, objectives = tabu_search(start_solution, students_years, students_disability, 
                             students_priority_lists, students_sex, students_departments, 
                             dormitorys_capacity, dormitory_position, departments_position, 
                             'both')
@@ -111,6 +112,14 @@ def main_loop():
 
             input()
         
+        plt.figure(figsize=(10, 5))
+        plt.plot(iterations, objectives, marker='o', label='Funkcja celu')
+        plt.xlabel('Iteracja')
+        plt.ylabel('Wartość funkcji celu')
+        plt.title('Wartość funkcji celu w kolejnych iteracjach')
+        plt.legend()
+        plt.grid()
+        plt.show()
         while True:
             clear()
             generate_new_data_choice = int(input('Czy chcesz wygenerować nowe dane (0: NIE; 1: TAK)?'))

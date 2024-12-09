@@ -1,6 +1,7 @@
 from typing import List, Union, Dict, Tuple
 from math import sqrt
 
+
 disability_priority: Dict[int, int] = {1: 100, 2: 75, 3: 50, 0: 25}  # Priorytet na podstawie stopnia niepełnosprawności używany w funkcji celu
 
 def calculate_distances(dorm_pos: List[tuple[float]], dep_pos: List[tuple[float]]) -> List[List[float]]:
@@ -152,6 +153,9 @@ def tabu_search(
     iteration = 0
     no_improvement_counter = 0  # Licznik iteracji bez poprawy
 
+    iterations = []
+    objectives = []
+
     def check_aspiration(solution, objective_value):
         '''Sprawdzenie kryterium aspiracji.'''
         if solution in tabu_list:
@@ -166,6 +170,12 @@ def tabu_search(
     while iteration < max_iterations:
         print(f"Iteracja {iteration}, najlepsze rozwiązanie: {best_solution}, wartość funkcji celu: {best_objective}")
 
+        # Zbieranie danych do wykresu
+        iterations.append(iteration)
+        print(iterations)
+        objectives.append(best_objective)
+        print(objectives)
+        
         # Generowanie sąsiedztwa z uwzględnieniem typu sąsiedztwa
         neighbourhood = generate_neighbourhood(
             current_solution, prior_list, dorm_capacity, neighbourhood_type
@@ -218,5 +228,5 @@ def tabu_search(
 
         iteration += 1
 
-    return best_solution, best_objective
+    return best_solution, best_objective, iterations, objectives
 
