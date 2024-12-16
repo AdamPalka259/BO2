@@ -2,7 +2,7 @@ from rand import generate_data
 from tabu_search import tabu_search, starting_solution
 import os
 import matplotlib.pyplot as plt
-
+import time 
 clear = lambda: os.system('cls')
 
 def generate_new_data():
@@ -102,38 +102,67 @@ def main_loop():
         
         elif neighbourhood_choice == 4:
             print('')
-            best_solution, best_objective, iterations, objectives = tabu_search(start_solution, students_years, students_disability, 
-                            students_priority_lists, students_sex, students_departments, 
-                            dormitorys_capacity, dormitory_position, departments_position, 
-                            'both')
+            start_time = time.time()
+            N = 200
+            num_dorm = 5 #liczba akadmiekow
+           # num_dep = 4 #liczba wydzialow []
+            num=0
+            wekt_rozw_do_wykresu_kamil=[]
+            for num_dep in [1, 2,3, 4,5, 6, 8]:
+                [students_years,
+                students_disability,
+                students_priority_lists,
+                students_departments,
+                students_sex,
+                dormitorys_capacity,
+                dormitory_position,
+                departments_position] = generate_data(N, num_dorm, num_dep)
+                start_solution = starting_solution(students_priority_lists, students_disability, students_sex, dormitorys_capacity)
+
+                best_solution, best_objective, iterations, objectives = tabu_search(start_solution, students_years, students_disability, 
+                                students_priority_lists, students_sex, students_departments, 
+                                dormitorys_capacity, dormitory_position, departments_position, 
+                                'both')
+                end_time = time.time()
+                wekt_rozw_do_wykresu_kamil.append(((end_time - start_time), N, num_dorm, num_dep, best_solution, iterations, iterations[-1]))
+
+
+                print("Najlepsze rozwiązanie:", best_solution)
+                print("Wartość funkcji celu:", best_objective)
+                print(f"Czas wykonania:", end_time - start_time, "sekundy")
+
             
-            print("Najlepsze rozwiązanie:", best_solution)
-            print("Wartość funkcji celu:", best_objective)
+                plt.figure(figsize=(10, 5))
+                plt.plot(iterations, objectives, marker='o', label='Funkcja celu')
+                
+                plt.xlabel('Iteracja')
+                plt.ylabel('Wartość funkcji celu')
+                plt.title(f'Wartość funkcji celu dla liczba studentów = {N}, liczby akademików = {num_dorm} i liczby wydziałów = {num_dep}')
+                plt.legend()
+                plt.grid()
+                folder_path = 'C:\\Users\\kamil\\Desktop\\Badanie_algorytmu_BO'  
+                file_name = f'liczba_wydziałów{num_dep}.png'
+                full_path = folder_path + '\\' +file_name
+                plt.savefig(full_path)
+                plt.show()
 
-            input()
-        
-        plt.figure(figsize=(10, 5))
-        plt.plot(iterations, objectives, marker='o', label='Funkcja celu')
-        plt.xlabel('Iteracja')
-        plt.ylabel('Wartość funkcji celu')
-        plt.title('Wartość funkcji celu w kolejnych iteracjach')
-        plt.legend()
-        plt.grid()
-        plt.show()
-        while True:
-            clear()
-            generate_new_data_choice = int(input('Czy chcesz wygenerować nowe dane (0: NIE; 1: TAK)?'))
-            if generate_new_data_choice == 0:
-                generate_data_flag = False
-                break
+            wektor_do_wykresu_czas=[ x[0] for x in wekt_rozw_do_wykresu_kamil]
+            wektor_do_wykresu_liczba_aka=[ x[3] for x in wekt_rozw_do_wykresu_kamil]
 
-            elif generate_new_data_choice == 1:
-                generate_data_flag = True
-                break
+            plt.figure(figsize=(10, 5))
+            plt.plot(wektor_do_wykresu_liczba_aka, wektor_do_wykresu_czas, marker='o', label='Funkcja celu')
+            plt.xlabel('Liczba wydziałów')
+            plt.ylabel('Czas trwania algorytmu [s]')
+            plt.title('Czas działania algorytmu, liczba studentów = {N}, liczba akademików = 5 i liczba wydziałów = [1, 2, 3, 4, 5, 6, 8]')
+            plt.legend()
+            plt.grid()
+            folder_path = 'C:\\Users\\kamil\\Desktop\\Badanie_algorytmu_BO'  
+            file_name = 'wykre_czasu_od_liczby_wydzialow.png'
+            full_path = folder_path + '\\' +file_name
+            plt.savefig(full_path)
+            plt.show()
 
-            else:
-                print('Wrong input!')
-        
-        
+            
+           
 if __name__ == '__main__':
     main_loop()
