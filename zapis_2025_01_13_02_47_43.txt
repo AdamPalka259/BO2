@@ -1,0 +1,8 @@
+Iloœæ studentów: 1
+Iloœæ akademików: 1
+Iloœæ wydzia³ów: 1
+Wybór s¹siedztwa: 1
+najlepsze rozw: [0]
+best objectives 4.963
+iteracje: [0]
+Wartoœæ funkcji celu dla kolejnych rozw[4.963]

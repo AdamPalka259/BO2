@@ -1,0 +1,8 @@
+Iloœæ studentów: 9
+Iloœæ akademików: 9
+Iloœæ wydzia³ów: 9
+Wybór s¹siedztwa: 1
+najlepsze rozw: [5, 1, 2, 4, 4, 3, 7, 3, 2]
+best objectives 40.619
+iteracje: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+Wartoœæ funkcji celu dla kolejnych rozw[107.446, 76.32, 61.838, 53.324, 49.627, 46.685, 44.182, 42.268, 40.619, 40.619, 40.619, 40.619, 40.619, 40.619, 40.619, 40.619, 40.619, 40.619]

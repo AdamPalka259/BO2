@@ -1,0 +1,8 @@
+Iloœæ studentów: 73
+Iloœæ akademików: 1
+Iloœæ wydzia³ów: 1
+Wybór s¹siedztwa: 1
+najlepsze rozw: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+best objectives 444.139
+iteracje: [0]
+Wartoœæ funkcji celu dla kolejnych rozw[444.139]
